@@ -10,49 +10,74 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
+import com.fidroid.skipper.R
+import com.fidroid.skipper.data.defaultAppsData
+import timber.log.Timber
 
 class SkipperService : AccessibilityService() {
 
     override fun onCreate() {
         super.onCreate()
+
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        Log.d(TAG, "onServiceConnected: ")
+        Timber.tag(TAG)
+        Timber.i("onServiceConnected: ")
+        val myServiceInfo = this.serviceInfo.apply {
+            packageNames = packageNames.plusElement("com.ss.android.article.news")
+        }
+        this.serviceInfo = myServiceInfo
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (rootInActiveWindow == null) return
-        Log.d(TAG, "onAccessibilityEvent: ${event?.packageName} $event")
-        val root = rootInActiveWindow
-        var targetNodes = when (root.packageName) {
-            "tv.danmaku.bili" -> root.findAccessibilityNodeInfosByViewId("tv.danmaku.bili:id/count_down")
-            "com.zhihu.android" -> root.findAccessibilityNodeInfosByViewId("com.zhihu.android:id/btn_skip")
-            "com.gelonghui.glhapp" -> root.findAccessibilityNodeInfosByViewId("com.gelonghui.glhapp:id/skip")
-            "com.jd.app.reader" -> root.findAccessibilityNodeInfosByViewId("com.jd.app.reader:id/count_down_time")
-            "com.tencent.qqlive" -> root.findAccessibilityNodeInfosByText("跳过")
-            else -> root.findAccessibilityNodeInfosByText("跳过")
+        Timber.d("onAccessibilityEvent: ${event?.packageName} $event")
+        val root = rootInActiveWindow ?: return
+        var targetNodes: List<AccessibilityNodeInfo>? = null
+        if (!root.packageName.isNullOrEmpty() && defaultAppsData.containsKey(root.packageName))
+            targetNodes = root.findAccessibilityNodeInfosByViewId(defaultAppsData[root.packageName])
+        if (targetNodes.isNullOrEmpty()) {
+            targetNodes = root.findAccessibilityNodeInfosByText(this.getString(R.string.skip))
         }
         if (targetNodes.isNullOrEmpty()) {
-            targetNodes = root.findAccessibilityNodeInfosByText("跳过")
+            targetNodes = root.findAccessibilityNodeInfosByText(this.getString(R.string.close))
         }
         if (targetNodes.isNullOrEmpty()) {
-            targetNodes = root.findAccessibilityNodeInfosByText("Skip")
+            targetNodes = root.findAccessibilityNodeInfosByText(this.getString(R.string.i_know))
+        }
+        if (targetNodes.isNullOrEmpty()) {
+            targetNodes = root.findAccessibilityNodeInfosByText(this.getString(R.string.skip_caps))
         }
         if (targetNodes.isNullOrEmpty()) {
             return
         }
         val targetNode = targetNodes[0]
-        Log.d(TAG, "onAccessibilityEvent: target viewId: ${targetNode.viewIdResourceName}")
-        if (targetNode.isClickable) {
-            val result = targetNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            Log.d(TAG, "onAccessibilityEvent: target clicked: $result")
-        } else {
-            val rect = Rect()
-            targetNode.getBoundsInScreen(rect)
-            clickOnScreen((rect.left + rect.right) / 2.0f, (rect.top + rect.bottom) / 2.0f, null, null)
+        Timber.i("onAccessibilityEvent: target viewId: ${targetNode.viewIdResourceName}")
+        when {
+            targetNode.isClickable -> {
+                val result = targetNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                Timber.i("onAccessibilityEvent: target clicked: $result")
+            }
+            shouldClickNode(targetNode) -> {
+                Timber.i("onAccessibilityEvent: target touch click")
+                val rect = Rect()
+                targetNode.getBoundsInScreen(rect)
+                clickOnScreen((rect.left + rect.right) / 2.0f, (rect.top + rect.bottom) / 2.0f, null, null)
+            }
+            else -> {
+                Timber.d("onAccessibilityEvent: can not found target")
+            }
         }
+    }
+
+    private fun shouldClickNode(targetNode: AccessibilityNodeInfo): Boolean {
+        val skip = getString(R.string.skip)
+        val close = getString(R.string.close)
+        val text = targetNode.text.trim()
+        return text.startsWith(skip) || text.endsWith(skip) || text == skip ||
+                text.startsWith(close) || text.endsWith(close) || text == close
+
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -71,7 +96,7 @@ class SkipperService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        Log.d(TAG, "onInterrupt: ")
+        Timber.w("onInterrupt: ")
     }
 
 

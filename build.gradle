@@ -18,9 +18,21 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
     }
 }
+
+ext {
+    signs = {
+        def keystorePropertiesFile = rootProject.file("keystore.properties")
+        def keystoreProperties = new Properties()
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+        storeFile file(keystoreProperties['STORE_FILE'])
+        storePassword keystoreProperties['STORE_PWD']
+        keyAlias keystoreProperties['KEY_ALIAS']
+        keyPassword keystoreProperties['KEY_PWD']
+    }
+}
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir
