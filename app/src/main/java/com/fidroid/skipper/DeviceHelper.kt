@@ -17,12 +17,8 @@ fun isAccessibilitySettingsEnabled(context: Context, clazz: Class<out Accessibil
     if (accessibilityEnabled == 1) {
         val settingValue: String = Settings.Secure.getString(context.applicationContext.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
         mStringColonSplitter.setString(settingValue)
-        while (mStringColonSplitter.hasNext()) {
-            val accessibilityService = mStringColonSplitter.next()
-            if (accessibilityService.equals(service, ignoreCase = true)) {
-                return true
-            }
-        }
+        return !mStringColonSplitter.find { it.lowercase() == service.lowercase() }.isNullOrEmpty()
+
     }
     return false
 }

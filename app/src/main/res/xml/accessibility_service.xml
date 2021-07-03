@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeAllMask"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowsChanged|typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds"
     android:canPerformGestures="true"
     android:canRetrieveWindowContent="true"
-    android:notificationTimeout="1500"
-    android:packageNames="tv.danmaku.bili,com.tencent.qqlive,
-    com.youku.phone,
-    com.qiyi.video,
-    com.amazon.kindlefc,
-    com.zhihu.android,
-    com.xiaomi.youpin,
-    com.gelonghui.glhapp,
-    com.jingdong.app.mall,
-    com.jd.app.reader,
-    com.dangdang.buy2"/>
+    android:notificationTimeout="1000"
+    android:packageNames="com.tencent.qqlive" />

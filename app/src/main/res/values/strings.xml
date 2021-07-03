@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">Skipper</string>
+    <string name="app_name">跳跳Ad</string>
     <string name="skip_caps">SKIP</string>
     <string name="skip">跳过</string>
     <string name="close">关闭</string>
-    <string name="i_know">我知道了</string>
+    <string name="i_known">我知道了</string>
+    <string name="i_know">知道了</string>
+    <string name="do_next_time">下次再说</string>
+    <string name="service_is_running">服务已经开启…</string>
+    <string name="service_is_stopped">服务已停止…</string>
 </resources>
